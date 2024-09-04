@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="sidebar" style="background-color: #e9eaea;">
+    <h1>Weather Predictor App ⛈️</h1>
+    <!-- <img src="{{ url_for('static', filename='img.jpg') }}" alt="Weather Image"> -->
+    <p>This Artificial Intelligence App can predict the future weather given their corresponding parameters.</p>
+
+    <form id="prediction-form">
+        <div class="slider">
+            <label for="precipitation">Precipitation</label>
+            <input type="range" id="precipitation" name="precipitation" min="{{ slider_data.precipitation.min }}" max="{{ slider_data.precipitation.max }}" value="{{ slider_data.precipitation.value }}" step="0.01">
+        </div>
+        <div class="slider">
+            <label for="temp_max">Max Temperature</label>
+            <input type="range" id="temp_max" name="temp_max" min="{{ slider_data.temp_max.min }}" max="{{ slider_data.temp_max.max }}" value="{{ slider_data.temp_max.value }}" step="0.01">
+        </div>
+        <div class="slider">
+            <label for="temp_min">Min Temperature</label>
+            <input type="range" id="temp_min" name="temp_min" min="{{ slider_data.temp_min.min }}" max="{{ slider_data.temp_min.max }}" value="{{ slider_data.temp_min.value }}" step="0.01">
+        </div>
+        <div class="slider">
+            <label for="wind">Wind</label>
+            <input type="range" id="wind" name="wind" min="{{ slider_data.wind.min }}" max="{{ slider_data.wind.max }}" value="{{ slider_data.wind.value }}" step="0.01">
+        </div>
+        <button type="submit">Predict</button>
+    </form>
+</div>
+
+<div class="content" style="background-color: rgb(0 235 253);">
+    <h2>Weather Predictor ⛅️</h2>
+    <p>This app predicts using a Machine Learning Model whether given parameters indicate upcoming weather is either Drizzle, Sun, Snow, Fog or Rain. You can also update the measurements by hand using sliders in the sidebar.</p>
+    <div id="charts" style="width:1800px;height: 300px;">
+        <div id="radar-chart"></div>
+        <div id="bar-chart"></div>
+        <div id="donut-chart"></div>
+    </div>
+    <div id="prediction-results"></div>
+</div>
+
+<script style="color: aqua;">
+document.getElementById('prediction-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const data = {
+        precipitation: parseFloat(formData.get('precipitation')),
+        temp_max: parseFloat(formData.get('temp_max')),
+        temp_min: parseFloat(formData.get('temp_min')),
+        wind: parseFloat(formData.get('wind'))
+    };
+
+    fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        document.getElementById('prediction-results').innerHTML = `
+            <h3>Weather Prediction ✅</h3>
+            <p>Machine Learning Model Result: ${result.pred_result}</p>
+            <p>Probability Drizzle: ${result.probabilities.drizzle}%</p>
+            <p>Probability Rain: ${result.probabilities.rain}%</p>
+            <p>Probability Sun: ${result.probabilities.sun}%</p>
+            <p>Probability Snow: ${result.probabilities.snow}%</p>
+            <p>Probability Fog: ${result.probabilities.fog}%</p>
+        `;
+    });
+
+    fetch('/radar_chart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(chart => {
+        Plotly.newPlot('radar-chart', chart.data, chart.layout);
+    });
+
+    fetch('/bar_chart')
+    .then(response => response.json())
+    .then(chart => {
+        Plotly.newPlot('bar-chart', chart.data, chart.layout);
+    });
+
+    fetch('/donut_chart')
+    .then(response => response.json())
+    .then(chart => {
+        Plotly.newPlot('donut-chart', chart.data, chart.layout);
+    });
+});
+</script>
+{% endblock %}
