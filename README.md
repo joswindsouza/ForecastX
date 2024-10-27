@@ -5,7 +5,7 @@
 ## Features
 
 - **Real-time Weather Data**: Access current weather conditions for any location.
-- **Predictive Analysis**: Uses advanced predictive models to forecast weather patterns.
+- **Predictive Analysis**: Uses advanced predictive models to forecast weather patterns and winds.
 - **Forecasting**: Get detailed weather forecasts for the upcoming days.
 - **User Interface**: Intuitive and easy-to-navigate graphical interface.
 - **Customizable**: Adjust settings to fit your preferences.
